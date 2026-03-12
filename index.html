@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Zahlenaufgabe</title>
+
+<style>
+
+body{
+font-family:Arial;
+padding:20px;
+}
+
+.container{
+display:flex;
+gap:80px;
+}
+
+.block{
+display:flex;
+gap:30px;
+}
+
+.column{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.row{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+input{
+width:80px;
+padding:8px;
+font-size:18px;
+}
+
+button{
+padding:8px 12px;
+font-size:18px;
+border-radius:6px;
+border:1px solid #888;
+background:#eee;
+cursor:pointer;
+}
+
+.correct{
+background:#8cff8c;
+}
+
+.wrong{
+background:#ff8c8c;
+}
+
+.skip{
+background:#ff8c8c;
+}
+
+.rounded{
+margin-left:10px;
+font-weight:bold;
+}
+
+.failCount{
+color:red;
+font-weight:bold;
+}
+
+.skipX{
+color:red;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Aufgaben</h2>
+
+<div class="container">
+
+<div class="block">
+<div class="column" id="col0"></div>
+<div class="column" id="col1"></div>
+</div>
+
+<div class="block">
+<div class="column" id="col2"></div>
+<div class="column" id="col3"></div>
+</div>
+
+<div class="block">
+<div class="column" id="col4"></div>
+<div class="column" id="col5"></div>
+</div>
+
+</div>
+
+<script>
+
+const solutions=[
+
+[4.2,5.7,3.1,8.6,7.3,9.9,2.4,6.8,1.2,4.5],
+[2.5,7.4,6.6,3.3,8.1,5.5,9.2,4.4,1.7,6.9],
+
+[1.2,3.4,5.6,7.8,9.1,2.3,4.5,6.7,8.9,1.1],
+[2.1,4.3,6.5,8.7,1.9,3.2,5.4,7.6,9.8,2.2],
+
+[3.5,6.1,2.4,7.7,5.8,1.6,8.3,4.9,2.2,6.4],
+[9.1,4.6,7.2,3.8,5.5,2.7,6.9,1.4,8.8,3.3]
+
+];
+
+const columns=6;
+const rows=10;
+
+let attempts=Array.from({length:columns},()=>Array(rows).fill(0));
+let current=Array(columns).fill(0);
+
+function createInputs(){
+
+for(let c=0;c<columns;c++){
+
+let column=document.getElementById("col"+c);
+
+for(let r=0;r<rows;r++){
+
+let row=document.createElement("div");
+row.className="row";
+
+let label=document.createElement("span");
+label.textContent=(r+1)+".";
+
+let input=document.createElement("input");
+input.type="text";
+input.inputMode="decimal";
+
+input.dataset.col=c;
+input.dataset.row=r;
+
+if(r!==0) input.disabled=true;
+
+let button=document.createElement("button");
+button.textContent="✓";
+
+button.onclick=()=>check(input,button);
+
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter") check(input,button);
+});
+
+let rounded=document.createElement("span");
+rounded.className="rounded";
+
+let fail=document.createElement("span");
+fail.className="failCount";
+
+let skip=document.createElement("span");
+skip.className="skipX";
+
+row.append(label,input,button,rounded,fail,skip);
+column.appendChild(row);
+
+}
+
+}
+
+}
+
+function check(input,button){
+
+let col=parseInt(input.dataset.col);
+let row=parseInt(input.dataset.row);
+
+if(row!==current[col]) return;
+
+let value=parseFloat(input.value.replace(",","."));
+let solution=solutions[col][row];
+
+let fail=input.parentElement.querySelector(".failCount");
+
+if(Math.abs(value-solution)<0.001){
+
+input.classList.add("correct");
+input.disabled=true;
+
+button.style.display="none";
+
+input.parentElement.querySelector(".rounded").textContent="→ "+Math.round(solution);
+
+fail.textContent="";
+
+current[col]++;
+enableNext(col);
+
+}else{
+
+attempts[col][row]++;
+
+input.classList.add("wrong");
+
+fail.textContent=attempts[col][row];
+
+if(attempts[col][row]>=3){
+
+input.classList.remove("wrong");
+input.classList.add("skip");
+
+input.disabled=true;
+
+button.style.display="none";
+
+input.parentElement.querySelector(".skipX").textContent="X";
+
+fail.textContent="";
+
+current[col]++;
+enableNext(col);
+
+}
+
+}
+
+}
+
+function enableNext(col){
+
+let next=current[col];
+
+if(next<rows){
+
+let inputs=document.querySelectorAll(`input[data-col='${col}']`);
+let buttons=document.querySelectorAll(`#col${col} button`);
+
+inputs[next].disabled=false;
+buttons[next].disabled=false;
+
+inputs[next].focus();
+
+}
+
+}
+
+createInputs();
+
+</script>
+
+</body>
+</html>
