@@ -232,8 +232,10 @@ let label=document.createElement("span");
 label.textContent=(r+1)+".";
 
 let input=document.createElement("input");
-input.type="text";
-input.inputMode="decimal";
+
+// ✅ ANDROID FIX
+input.type="number";
+input.step="any";
 
 input.dataset.col=c;
 input.dataset.row=r;
@@ -288,7 +290,6 @@ let bubble=document.getElementById("bubble"+col);
 bubble.textContent=tips[col][row] || "Kein Tipp";
 bubble.style.display="block";
 
-// 👉 NEU: nach 5 Sekunden ausblenden
 setTimeout(()=>{
 bubble.style.display="none";
 },5000);
@@ -302,7 +303,7 @@ let row=parseInt(input.dataset.row);
 
 if(row!==current[col]) return;
 
-let value=parseFloat(input.value.replace(",","."));
+let value=parseFloat(input.value.toString().replace(",","."));
 let solution=solutions[col][row];
 
 let fail=input.parentElement.querySelector(".failCount");
